@@ -11,7 +11,7 @@ module.exports.getUser = (req, res) => {
 module.exports.getAllUsers = (req, res) => {
   User.find({})
     .then(user => res.send({ data: user }))
-    .catch(err => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(err => res.status(500).send({ message: err.message }));
 };
 
 // Контроллер создания user
