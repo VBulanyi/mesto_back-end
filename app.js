@@ -11,8 +11,7 @@ const app = express();
 // Парсер body
 const bodyParser = require('body-parser');
 
-const userRouter = require('./routes/users');
-const cardsRouter = require('./routes/cards');
+const router = require('./routes/router');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -28,7 +27,7 @@ app.listen(PORT, () => {
   console.log(`You listen potr ${PORT}`);
 });
 
-//Тестовый вариант для авторизации, при создании user присваивается данный owner id
+// Тестовый вариант для авторизации, при создании user присваивается данный owner id
 app.use((req, res, next) => {
   req.user = {
     _id: '5db82274432aab101860784a',
@@ -38,10 +37,8 @@ app.use((req, res, next) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', userRouter);
+app.use('/', router);
 
-app.use('/', cardsRouter);
-
-app.use(function (req, res, next) {
-  res.status(404).send({ "message": "Запрашиваемый ресурс не найден" });
+app.use((req, res) => {
+  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
 });
