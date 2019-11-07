@@ -1,4 +1,8 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 // Контроллер возвращает user по ID
 function getUser(req, res) {
@@ -19,8 +23,13 @@ function getAllUsers(req, res) {
 
 // Контроллер создания user
 function createUser(req, res) {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 12)
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    }))
     .then((user) => res.send({ data: user }))
     .catch((err) => res.status(500).send({ message: err.message }));
 }
@@ -42,7 +51,6 @@ function updateProfile(req, res) {
 }
 
 // Контроллер обновление аватара
-
 function updateAvatar(req, res) {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
@@ -58,6 +66,28 @@ function updateAvatar(req, res) {
     .catch(() => res.status(400).send({ message: 'not validated' }));
 }
 
+// Котроллер входа
+function signin(req, res) {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      if (!user) {
+        res.status(401).send({ message: 'не верный логин или пароль' });
+      }
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' },
+      );
+      res.cookie('jwt', token, {
+        maxAge: 3600000,
+        httpOnly: true,
+        sameSite: true,
+      })
+        .end();
+    })
+    .catch((err) => res.status(401).send({ message: err.message }));
+}
+
 module.exports = {
-  getUser, getAllUsers, createUser, updateProfile, updateAvatar,
+  getUser, getAllUsers, createUser, updateProfile, signin, updateAvatar,
 };

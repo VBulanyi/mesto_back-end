@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 
 const mongoose = require('mongoose');
@@ -12,6 +14,8 @@ const app = express();
 const bodyParser = require('body-parser');
 
 const router = require('./routes/router');
+const { signin, createUser } = require('./controllers/users');
+const auth = require('./middlewares/auth');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -27,17 +31,12 @@ app.listen(PORT, () => {
   console.log(`You listen potr ${PORT}`);
 });
 
-// Тестовый вариант для авторизации, при создании user присваивается данный owner id
-app.use((req, res, next) => {
-  req.user = {
-    _id: '5db82274432aab101860784a',
-  };
-  next();
-});
-
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', router);
+app.use('/users', auth, router);
+app.use('/cards', auth, router);
+app.post('/signup', createUser);
+app.post('/signin', signin);
 
 app.use((req, res) => {
   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
