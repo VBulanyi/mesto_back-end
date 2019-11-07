@@ -27,10 +27,10 @@ function createUser(req, res) {
 
 // Контроллер обновление профайла
 function updateProfile(req, res) {
-  const { newName, newAbout } = req.body;
+  const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
-    { name: newName, about: newAbout },
+    { name, about },
     {
       new: true,
       runValidators: true,
@@ -44,10 +44,10 @@ function updateProfile(req, res) {
 // Контроллер обновление аватара
 
 function updateAvatar(req, res) {
-  const { newAvatar } = req.body;
+  const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
-    { avatar: newAvatar },
+    { avatar },
     {
       new: true,
       runValidators: true,
