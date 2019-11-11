@@ -1,28 +1,36 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const { BadRequestError, ValidationError, NotFoundError } = require('../errors/error-handler');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 // Контроллер возвращает user по ID
-function getUser(req, res) {
+function getUser(req, res, next) {
   User.find({ _id: req.params.id })
     .then((user) => {
-      if (user.length > 0) res.send({ data: user });
-      else res.status(404).send({ message: 'пользователя не существует' });
+      if (!user.length > 0) {
+        throw new NotFoundError('Нет пользователя с таким id');
+      }
+      res.send({ data: user });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(next);
 }
 
 // Контроллер возвращает всех user
-function getAllUsers(req, res) {
+function getAllUsers(req, res, next) {
   User.find({})
-    .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .then((user) => {
+      if (!user.length > 0) {
+        throw new NotFoundError('Нет ни одного пользователя');
+      }
+      res.send({ data: user });
+    })
+    .catch(next);
 }
 
 // Контроллер создания user
-function createUser(req, res) {
+function createUser(req, res, next) {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -31,11 +39,12 @@ function createUser(req, res) {
       name, about, avatar, email, password: hash,
     }))
     .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(() => { throw new BadRequestError('Не верные данные'); })
+    .catch(next);
 }
 
 // Контроллер обновление профайла
-function updateProfile(req, res) {
+function updateProfile(req, res, next) {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -47,11 +56,13 @@ function updateProfile(req, res) {
     },
   )
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(400).send({ message: 'not validated' }));
+    .catch(() => { throw new BadRequestError('Не верные данные'); })
+    .catch(next);
 }
 
+
 // Контроллер обновление аватара
-function updateAvatar(req, res) {
+function updateAvatar(req, res, next) {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -63,16 +74,17 @@ function updateAvatar(req, res) {
     },
   )
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(400).send({ message: 'not validated' }));
+    .catch(() => { throw new BadRequestError('Не верные данные'); })
+    .catch(next);
 }
 
 // Котроллер входа
-function signin(req, res) {
+function signin(req, res, next) {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
       if (!user) {
-        res.status(401).send({ message: 'не верный логин или пароль' });
+        throw new ValidationError('Не верный логин или пароль');
       }
       const token = jwt.sign(
         { _id: user._id },
@@ -85,7 +97,7 @@ function signin(req, res) {
       })
         .end();
     })
-    .catch((err) => res.status(401).send({ message: err.message }));
+    .catch(next);
 }
 
 module.exports = {

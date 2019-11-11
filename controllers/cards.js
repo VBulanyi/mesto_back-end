@@ -1,49 +1,56 @@
 const Card = require('../models/card');
+const { BadRequestError, NotFoundError } = require('../errors/error-handler');
+
 
 // Контроллер создания карточки. На входе получает name и link
-function createCard(req, res) {
+function createCard(req, res, next) {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send({ data: card }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(() => { throw new BadRequestError('Не верные данные'); })
+    .catch(next);
 }
 
 // Контроллер возвращает все карточки
-function getAllCards(req, res) {
+function getAllCards(req, res, next) {
   Card.find({})
     .then((card) => res.send({ data: card }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(() => { throw new NotFoundError('Карточки не созданы'); })
+    .catch(next);
 }
 
 // Контроллер удаления карточки по ID
-function deleteCard(req, res) {
+function deleteCard(req, res, next) {
   Card.findByIdAndRemove(req.params.id)
     .then((card) => {
-      if (!card) res.status(404).send({ message: 'нет такой карточки' });
-      else res.send({ data: card });
+      if (!card) {
+        throw new NotFoundError('Карточки не существует');
+      } else res.send({ data: card });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(next);
 }
 
 // Контроллер лайк карточки
-function likeCard(req, res) {
+function likeCard(req, res, next) {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
     .then((card) => res.send({ data: card }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(() => { throw new BadRequestError('Ошибка'); })
+    .catch(next);
 }
 // Контроллер дислайк карточки
-function dislikeCard(req, res) {
+function dislikeCard(req, res, next) {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
     { new: true },
   )
     .then((card) => res.send({ data: card }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(() => { throw new BadRequestError('Ошибка'); })
+    .catch(next);
 }
 
 module.exports = {
