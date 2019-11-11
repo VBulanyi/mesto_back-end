@@ -18,7 +18,6 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const router = require('./routes/router');
 const { signin, createUser } = require('./controllers/users');
-const auth = require('./middlewares/auth');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -46,15 +45,17 @@ app.get('/crash-test', () => {
     throw new Error('Сервер сейчас упадёт');
   }, 0);
 });
-app.use('/', auth, router);
+app.use('/', router);
 app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
     email: Joi.string().required().email(),
+    avatar: Joi.string().required(),
     password: Joi.string().required(),
     about: Joi.string().required().min(2).max(30),
   }),
 }), createUser);
+
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
