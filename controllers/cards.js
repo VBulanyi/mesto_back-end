@@ -14,6 +14,7 @@ function createCard(req, res, next) {
 // Контроллер возвращает все карточки
 function getAllCards(req, res, next) {
   Card.find({})
+    .populate('user')
     .then((card) => res.send({ data: card }))
     .catch(() => { throw new NotFoundError('Карточки не созданы'); })
     .catch(next);

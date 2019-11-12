@@ -93,7 +93,7 @@ function signin(req, res, next) {
       res.cookie('jwt', token, {
         maxAge: 3600000,
         httpOnly: true,
-        sameSite: true,
+        sameSite: false,
       })
         .end();
     })
