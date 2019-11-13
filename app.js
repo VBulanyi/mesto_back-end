@@ -59,20 +59,19 @@ app.post('/signup', celebrate({
   }),
 }), createUser);
 
-// app.post('/signin', celebrate({
-//   body: Joi.object().keys({
-//     email: Joi.string().required().email(),
-//     password: Joi.string().required(),
-//   }),
-// }), signin);
-
-app.post('/signin', signin);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), signin);
 
 app.use(errorLogger);
 app.use(errors());
-app.use((err, req, res) => {
-  // если у ошибки нет статуса, выставляем 500
-  const { statusCode = 500, message } = err;
+
+app.use((err, req, res, next) => {
+  // если у ошибки нет статуса, выставляем 404
+  const { statusCode = 404, message } = err;
 
   res
     .status(statusCode)

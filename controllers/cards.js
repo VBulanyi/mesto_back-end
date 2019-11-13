@@ -22,10 +22,10 @@ function getAllCards(req, res, next) {
 
 // Контроллер удаления карточки по ID
 function deleteCard(req, res, next) {
-  Card.findByIdAndRemove(req.params.id)
+  Card.findOneAndDelete({ _id: req.params.id, owner: req.user._id })
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Карточки не существует');
+        throw new NotFoundError('Вы не можете удалить эту карточку');
       } else res.send({ data: card });
     })
     .catch(next);
