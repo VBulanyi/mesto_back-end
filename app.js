@@ -69,6 +69,7 @@ app.post('/signin', celebrate({
 app.use(errorLogger);
 app.use(errors());
 
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   // если у ошибки нет статуса, выставляем 404
   const { statusCode = 404, message } = err;
