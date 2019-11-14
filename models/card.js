@@ -1,14 +1,5 @@
 const mongoose = require('mongoose');
-const validate = require('mongoose-validator')
-
-// Валидация url
-const isURL = [
-  validate({
-    validator: 'matches',
-    arguments: /(^https?:\/\/)?[a-z0-9~_\-\.]+\.[a-z]{2,9}(\/|:|\?[!-~]*)?$/i,
-    message: 'Must be a Valid URL',
-  }),
-];
+const isURL = require('validator/lib/isURL');
 
 // Модель card в БД
 const cardSchema = new mongoose.Schema({
@@ -21,7 +12,10 @@ const cardSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
-    validate: isURL,
+    validate: {
+      validator: (v) => isURL(v),
+      message: 'не является ссылкой',
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,

@@ -1,12 +1,21 @@
 const userRouter = require('express').Router();
+const auth = require('../middlewares/auth');
 
-const { createUser, getUser, getAllUsers } = require('../controllers/users');
+const {
+  getUser, getAllUsers, updateProfile, updateAvatar,
+} = require('../controllers/users');
 
 // Роуты user
-userRouter.get('/users/:id', getUser);
+// вернуть юзера по id
+userRouter.get('/users/:id', auth, getUser);
 
-userRouter.get('/users', getAllUsers);
+// вернуть всех юзеров
+userRouter.get('/users', auth, getAllUsers);
 
-userRouter.post('/users', createUser);
+// обновить профиль юзера
+userRouter.patch('/users/me', auth, updateProfile);
+
+// обновить аватар
+userRouter.patch('/users/me/avatar', auth, updateAvatar);
 
 module.exports = userRouter;
