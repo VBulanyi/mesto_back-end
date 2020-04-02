@@ -1,12 +1,15 @@
 # mesto_back-end
-# 
-# Учебный проект
-#
-# Version 3.1.0
-#
-# About project
-# back-end for mesto project
-# 
-# Web access
-# 84.201.160.149
-# http://mesto2go.tk/
+
+# Описание
+  Учебный проект
+
+  Бэкэнд для проекта mesto
+
+# Version 1.0.0
+
+# Развёртка проекта
+
+- обновить зависимости npm i
+- запуск в режиме разработки npm run dev
+- запуск npm run start
+
